@@ -1,22 +1,22 @@
-resource "kubernetes_config_map_v1" "order" {
+resource "kubernetes_config_map_v1" "book" {
   metadata {
-    name      = "order"
+    name      = "book"
     labels = {
-      app = "order"
+      app = "book"
     }
   }
 
   data = {
-    "application.yml" = file("${path.module}/app-conf/order.yml")
+    "application.yml" = file("${path.module}/app-conf/book.yml")
   }
 }
 
-resource "kubernetes_deployment_v1" "order_deployment" {
-  depends_on = [kubernetes_deployment_v1.order_postgres_deployment]
+resource "kubernetes_deployment_v1" "book_deployment" {
+  depends_on = [kubernetes_deployment_v1.book_mysql_deployment]
   metadata {
-    name = "order"
+    name = "book"
     labels = {
-      app = "order"
+      app = "book"
     }
   }
  
@@ -24,13 +24,13 @@ resource "kubernetes_deployment_v1" "order_deployment" {
     replicas = 1
     selector {
       match_labels = {
-        app = "order"
+        app = "book"
       }
     }
     template {
       metadata {
         labels = {
-          app = "order"
+          app = "book"
         }
         annotations = {
           "prometheus.io/scrape" = "true"
@@ -42,16 +42,12 @@ resource "kubernetes_deployment_v1" "order_deployment" {
         service_account_name = "spring-cloud-kubernetes"      
         
         container {
-          image = "ghcr.io/greeta-order-02/order-service:6bacad6d3b99cfc978d911eecfc1afbb2f7fb614"
-          name  = "order"
+          image = "ghcr.io/greeta-book-01/book-service:6bacad6d3b99cfc978d911eecfc1afbb2f7fb614"
+          name  = "book"
           image_pull_policy = "Always"
           port {
             container_port = 8080
-          }
-          env {
-            name = "SPRING_DATASOURCE_URL"
-            value = "jdbc:postgresql://order-postgres:5432/orderdb"
-          }            
+          }          
           env {
             name  = "SPRING_CLOUD_BOOTSTRAP_ENABLED"
             value = "true"
@@ -69,7 +65,7 @@ resource "kubernetes_deployment_v1" "order_deployment" {
 
           env {
             name  = "OTEL_SERVICE_NAME"
-            value = "order"
+            value = "book"
           }
 
           env {
@@ -125,9 +121,9 @@ resource "kubernetes_deployment_v1" "order_deployment" {
   }
 }
 
-resource "kubernetes_horizontal_pod_autoscaler_v1" "order_hpa" {
+resource "kubernetes_horizontal_pod_autoscaler_v1" "book_hpa" {
   metadata {
-    name = "order-hpa"
+    name = "book-hpa"
   }
   spec {
     max_replicas = 2
@@ -135,24 +131,24 @@ resource "kubernetes_horizontal_pod_autoscaler_v1" "order_hpa" {
     scale_target_ref {
       api_version = "apps/v1"
       kind = "Deployment"
-      name = kubernetes_deployment_v1.order_deployment.metadata[0].name 
+      name = kubernetes_deployment_v1.book_deployment.metadata[0].name 
     }
     target_cpu_utilization_percentage = 70
   }
 }
 
-resource "kubernetes_service_v1" "order_service" {
-  depends_on = [kubernetes_deployment_v1.order_deployment]
+resource "kubernetes_service_v1" "book_service" {
+  depends_on = [kubernetes_deployment_v1.book_deployment]
   metadata {
-    name = "order"
+    name = "book"
     labels = {
-      app = "order"
+      app = "book"
       spring-boot = "true"
     }
   }
   spec {
     selector = {
-      app = "order"
+      app = "book"
     }
     port {
       port = 8080

@@ -1,9 +1,9 @@
-resource "kubernetes_deployment_v1" "order_ui_deployment" {
-  depends_on = [kubernetes_deployment_v1.order_deployment]
+resource "kubernetes_deployment_v1" "book_ui_deployment" {
+  depends_on = [kubernetes_deployment_v1.book_deployment]
   metadata {
-    name = "order-ui"
+    name = "book-ui"
     labels = {
-      app = "order-ui"
+      app = "book-ui"
     }
   }
  
@@ -11,19 +11,19 @@ resource "kubernetes_deployment_v1" "order_ui_deployment" {
     replicas = 1
     selector {
       match_labels = {
-        app = "order-ui"
+        app = "book-ui"
       }
     }
     template {
       metadata {
         labels = {
-          app = "order-ui"
+          app = "book-ui"
         }
       }
       spec {
         container {
-          image = "ghcr.io/greeta-order-02/order-ui"
-          name  = "order-ui"
+          image = "ghcr.io/greeta-book-01/book-ui"
+          name  = "book-ui"
           image_pull_policy = "Always"
           port {
             container_port = 4200
@@ -35,9 +35,9 @@ resource "kubernetes_deployment_v1" "order_ui_deployment" {
 }
 
 # Resource: Keycloak Server Horizontal Pod Autoscaler
-resource "kubernetes_horizontal_pod_autoscaler_v1" "order_ui_hpa" {
+resource "kubernetes_horizontal_pod_autoscaler_v1" "book_ui_hpa" {
   metadata {
-    name = "order-ui-hpa"
+    name = "book-ui-hpa"
   }
   spec {
     max_replicas = 2
@@ -45,20 +45,20 @@ resource "kubernetes_horizontal_pod_autoscaler_v1" "order_ui_hpa" {
     scale_target_ref {
       api_version = "apps/v1"
       kind = "Deployment"
-      name = kubernetes_deployment_v1.order_ui_deployment.metadata[0].name
+      name = kubernetes_deployment_v1.book_ui_deployment.metadata[0].name
     }
     target_cpu_utilization_percentage = 50
   }
 }
 
-resource "kubernetes_service_v1" "order_ui_service" {
-  depends_on = [kubernetes_deployment_v1.order_ui_deployment]
+resource "kubernetes_service_v1" "book_ui_service" {
+  depends_on = [kubernetes_deployment_v1.book_ui_deployment]
   metadata {
-    name = "order-ui"
+    name = "book-ui"
   }
   spec {
     selector = {
-      app = "order-ui"
+      app = "book-ui"
     }
     port {
       port = 4200
