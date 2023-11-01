@@ -20,12 +20,24 @@ resource "kubernetes_deployment_v1" "book_mysql_deployment" {
         }
       }
       spec {
-        volume {
-          name = "book-mysql-dbcreation-script"
-          config_map {
-            name = kubernetes_config_map_v1.book_mysql_config_map.metadata.0.name 
+        # Init Container for downloading init.sql file
+        init_container {
+          name  = "init-script-downloader"
+          image = "appropriate/curl"
+          args  = ["-o", "/tmp/data/init.sql", "https://raw.githubusercontent.com/kubedb/mysql-init-scripts/master/init.sql"]
+          
+          volume_mount {
+            name       = "init-script"
+            mount_path = "/tmp/data"
           }
         }
+
+        volume {
+          name = "init-script"
+          persistent_volume_claim {
+            claim_name = "init-script"
+          }
+        }                                                   
 
         container {
           name = "book-mysql"
@@ -48,12 +60,13 @@ resource "kubernetes_deployment_v1" "book_mysql_deployment" {
             exec {
               command = ["mysqladmin", "ping", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
             }
-          }
+          }                 
 
           volume_mount {
-            name = "book-mysql-dbcreation-script"
+            name       = "init-script"
             mount_path = "/docker-entrypoint-initdb.d"
-          }          
+          }                                                 
+
         }
       }
     }      

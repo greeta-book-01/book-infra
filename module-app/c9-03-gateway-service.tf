@@ -26,7 +26,7 @@ resource "kubernetes_secret_v1" "gateway" {
 
 resource "kubernetes_deployment_v1" "gateway_deployment" {
   depends_on = [kubernetes_deployment_v1.gateway_redis_deployment,
-                kubernetes_deployment_v1.order_deployment,
+                kubernetes_deployment_v1.book_deployment,
                 kubernetes_deployment_v1.erp_deployment]
   metadata {
     name = "gateway"

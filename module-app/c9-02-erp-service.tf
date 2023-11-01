@@ -12,7 +12,7 @@ resource "kubernetes_config_map_v1" "erp" {
 }
 
 resource "kubernetes_deployment_v1" "erp_deployment" {
-  depends_on = [kubernetes_deployment_v1.order_postgres_deployment]
+  depends_on = [kubernetes_deployment_v1.book_mysql_deployment]
   metadata {
     name = "erp"
     labels = {

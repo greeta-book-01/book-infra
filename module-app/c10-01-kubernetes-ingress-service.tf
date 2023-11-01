@@ -6,7 +6,6 @@ resource "kubernetes_ingress_v1" "ingress_default" {
                 kubernetes_service_v1.erp_service,
                 kubernetes_service_v1.book_service,
                 kubernetes_service_v1.keycloak_server_service,
-                kubernetes_service_v1.kafka_ui,
                 kubernetes_ingress_class_v1.ingress_class_default]
   wait_for_load_balancer = true
   metadata {
@@ -130,7 +129,6 @@ resource "kubernetes_ingress_v1" "ingress_observability_stack" {
                 kubernetes_service_v1.erp_service,
                 kubernetes_service_v1.book_service,
                 kubernetes_service_v1.keycloak_server_service,
-                kubernetes_service_v1.kafka_ui,
                 null_resource.deploy_grafana_script,
                 null_resource.update_kubeconfig,
                 kubernetes_ingress_class_v1.ingress_class_default,

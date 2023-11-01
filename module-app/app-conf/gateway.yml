@@ -26,12 +26,12 @@ spring:
         locator:
           enabled: true
       routes:
-        - id: order
-          uri: http://order:8080
+        - id: book
+          uri: http://book:8080
           predicates:
-            - Path=/order/**
+            - Path=/book/**
           filters:
-            - RewritePath=/order/(?<path>.*), /$\{path}
+            - RewritePath=/book/(?<path>.*), /$\{path}
         - id: erp
           uri: http://erp:8080
           predicates:
@@ -50,24 +50,24 @@ spring:
     store-type: redis
     timeout: 10m
     redis:
-      namespace: order:gateway
+      namespace: book:gateway
   security:
     oauth2: 
       resourceserver:
         jwt:
-          issuer-uri: https://keycloak.greeta.net/realms/order-realm
-          jwk-set-uri: ${spring.keycloak.server-url}/realms/order-realm/protocol/openid-connect/certs
+          issuer-uri: https://keycloak.greeta.net/realms/book-realm
+          jwk-set-uri: ${spring.keycloak.server-url}/realms/book-realm/protocol/openid-connect/certs
        
 
 jwt:
   auth:
     converter:
-      resource-id: order-app
+      resource-id: book-app
       principal-attribute: preferred_username
 
-order-app:
-  base-url: https://order.greeta.net
-  redirect-url: ${order-app.base-url}/*
+book-app:
+  base-url: https://book.greeta.net
+  redirect-url: ${book-app.base-url}/*
 
 logging:
   pattern: 
@@ -82,14 +82,14 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
-    groups-order: DESC
+    groups-order: ASC
     path: /
     config-url: /v3/api-docs/swagger-config
     urls:
       # - url: /v3/api-docs
       #   name: API Gateway Service
       #   primaryName: API Gateway Service
-      - url: /order/v3/api-docs
-        name: Order Service
+      - url: /book/v3/api-docs
+        name: Book Service
       - url: /erp/v3/api-docs
         name: ERP Service
